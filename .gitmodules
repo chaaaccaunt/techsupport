@@ -1,0 +1,3 @@
+[submodule "src/share/components/ui"]
+	path = src/share/components/ui
+	url = https://github.com/chaaaccaunt/forms.git
