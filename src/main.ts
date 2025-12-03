@@ -1,3 +1,5 @@
+import "remixicon/fonts/remixicon.css"
+
 import { createApp } from 'vue'
 import { router, store } from './entities'
 import App from './App.vue'
@@ -8,7 +10,6 @@ const app = createApp(App)
 uiElements.forEach((comp) => {
   if (!comp.__file) return
   const name = comp.__file.split("/")[comp.__file.split("/").length - 1].split(".")[0]
-  console.log(name)
   app.component(`c-${name.toLowerCase()}`, comp)
 })
 
