@@ -7,5 +7,5 @@ module.exports = defineConfig({
         additionalData: `@import "~@/share/css";`
       },
     }
-  }
+  },
 })

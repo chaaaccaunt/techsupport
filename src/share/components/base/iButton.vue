@@ -22,6 +22,10 @@ defineProps({
     type: Boolean as PropType<boolean>,
     default: () => false,
   },
+  type: {
+    type: String as PropType<"submit" | "button">,
+    default: () => "button",
+  },
 });
 
 const baseClasses =
@@ -43,7 +47,12 @@ const sizeClasses = {
 </script>
 
 <template>
-  <button :class="`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`" :disabled="disabled || loading">
+  <button
+    :class="`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`"
+    :disabled="disabled || loading"
+    :type="type"
+    @click="(e:Event) => $emit('clickEvent', (e.target as HTMLInputElement).value)"
+  >
     <i v-if="loading" class="ri-loader-4-line animate-spin mr-2"></i>
     <slot></slot>
   </button>

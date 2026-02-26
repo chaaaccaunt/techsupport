@@ -1,8 +1,24 @@
 <script lang="ts" setup>
 import { PropType } from "vue";
 
-defineOptions({ inheritAttrs: false });
+const emit = defineEmits(["inputEvent"]);
+
 defineProps({
+  type: {
+    type: String as PropType<string>,
+    required: false,
+    default: () => "text",
+  },
+  placeholder: {
+    type: String as PropType<string>,
+    required: false,
+    default: () => "",
+  },
+  required: {
+    type: Boolean as PropType<boolean>,
+    required: false,
+    default: () => false,
+  },
   label: {
     type: String as PropType<string>,
     required: false,
@@ -20,7 +36,20 @@ defineProps({
     type: String as PropType<string>,
     required: false,
   },
+  val: {
+    type: (String || Number) as PropType<string | number>,
+    required: false,
+  },
+  disabled: {
+    type: Boolean as PropType<boolean>,
+    required: false,
+    default: () => false,
+  },
 });
+
+function inputEv(ev: Event) {
+  emit("inputEvent", (ev.target as HTMLInputElement).value);
+}
 </script>
 
 <template>
@@ -33,6 +62,11 @@ defineProps({
         <i :class="`${icon} text-gray-400 text-sm`"></i>
       </div>
       <input
+        :type="type"
+        :placeholder="placeholder"
+        @input="inputEv"
+        :value="val"
+        :disabled="disabled"
         :class="`
             block w-full rounded-md border-gray-300 shadow-sm 
             focus:border-blue-500 focus:ring-blue-500 text-sm
@@ -40,7 +74,6 @@ defineProps({
             ${error ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}
             ${className}
           `"
-        v-bind="$attrs"
       />
     </div>
     <p v-if="error" class="mt-1 text-sm text-red-600">{{ error }}</p>

@@ -1,15 +1,30 @@
 <script lang="ts" setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import Button from "../base/iButton.vue";
+import { apiClient } from "@/main";
+import { useRouter } from "vue-router";
+import { useStore } from "@/entities";
+import { iUserInfo } from "@/entities/store/modules/auth";
+
+const router = useRouter();
+const store = useStore();
 
 const showNotifications = ref(false);
 const showProfile = ref(false);
+const user = computed(() => store.getters["auth/GET_USER"] as iUserInfo);
 
 const notifications = [
   { id: 1, text: "Просрочено ТО для оборудования ПК-001", type: "warning", time: "5 мин назад" },
   { id: 2, text: "Новая заявка на ремонт принтера", type: "info", time: "10 мин назад" },
   { id: 3, text: "Оборудование передано новому ответственному", type: "success", time: "1 час назад" },
 ];
+
+function logout() {
+  apiClient
+    .logout()
+    .then(() => router.push({ name: "Login" }))
+    .catch((error) => {});
+}
 </script>
 
 <template>
@@ -50,7 +65,7 @@ const notifications = [
               </div>
             </div>
             <div class="p-4">
-              <Button :variant="'outline'" :size="'sm'" class="w-full"> Показать все уведомления </Button>
+              <Button variant="outline" size="sm" class="w-full"> Показать все уведомления </Button>
             </div>
           </div>
         </div>
@@ -59,21 +74,21 @@ const notifications = [
             <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
               <i class="ri-user-line text-white text-sm"></i>
             </div>
-            <span class="text-sm font-medium">Администратор</span>
+            <span class="text-sm font-medium">{{ `${user.lastName} ${user.firstName[0]}.` }}</span>
             <i class="ri-arrow-down-s-line text-sm"></i>
           </button>
           <div v-if="showProfile" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
             <div class="p-2">
-              <a href="#" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+              <router-link :to="{ name: 'Profile' }" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
                 <i class="ri-user-settings-line mr-3"></i>
                 Профиль
-              </a>
+              </router-link>
               <a href="#" class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
                 <i class="ri-settings-line mr-3"></i>
                 Настройки
               </a>
               <hr class="my-2" />
-              <a href="#" class="flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md">
+              <a href="#" class="flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md" @click="logout">
                 <i class="ri-logout-box-line mr-3"></i>
                 Выход
               </a>
