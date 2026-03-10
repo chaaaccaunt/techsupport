@@ -8,4 +8,12 @@ module.exports = defineConfig({
       },
     }
   },
+  devServer: {
+    allowedHosts: ["node-dev.ru"],
+    client: {
+      webSocketURL: {
+        port: 443,
+      },
+    },
+  }
 })

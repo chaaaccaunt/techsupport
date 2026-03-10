@@ -1,189 +1,101 @@
-<script lang="ts" setup>
-import Card from "@/share/components/base/iCard.vue";
-import Button from "@/share/components/base/iButton.vue";
-import { ref } from "vue";
+<script setup lang="ts">
+import { computed } from "vue";
+import { useModal } from "@/share/components/shared/useModal";
+import { getDashboardStats, getTicketViewItems, getTransferViewItems } from "@/share/mocks/schemaMocks";
 
-const stats = ref([
-  { title: "Всего оборудования", value: "1,247", icon: "ri-computer-line", color: "blue" },
-  { title: "Исправное", value: "1,156", icon: "ri-checkbox-circle-line", color: "green" },
-  { title: "Неисправное", value: "23", icon: "ri-error-warning-line", color: "red" },
-  { title: "На ТО", value: "45", icon: "ri-tools-line", color: "yellow" },
-  { title: "Без ответственного", value: "12", icon: "ri-user-unfollow-line", color: "orange" },
-  { title: "Просроченное ТО", value: "8", icon: "ri-time-line", color: "purple" },
-]);
+const { openModal } = useModal();
+const stats = computed(() => getDashboardStats());
+const tickets = computed(() => getTicketViewItems());
+const transfers = computed(() => getTransferViewItems().slice(0, 4));
 
-const recentTickets = ref([
-  { id: "T-001", equipment: "ПК-12345", description: "Не включается монитор", priority: "Высокий", status: "Новая" },
-  { id: "T-002", equipment: "ПР-67890", description: "Замятие бумаги", priority: "Средний", status: "В работе" },
-  { id: "T-003", equipment: "СК-11111", description: "Не сканирует документы", priority: "Низкий", status: "Новая" },
-]);
-
-const recentTransfers = ref([
-  { equipment: "ПК-12345", from: "Иванов И.И.", to: "Петров П.П.", date: "2024-12-18" },
-  { equipment: "НБ-67890", from: "Сидоров С.С.", to: "Козлов К.К.", date: "Сегодня" },
-]);
+const noop = () => {};
+const openExportModal = () => openModal({ key: "dashboard.export", size: "md" });
+const openEditTicketModal = (ticketId: string) => openModal({ key: "dashboard.edit-ticket", size: "lg", payload: { ticketId } });
+const openDeleteTicketModal = (ticketId: string) => openModal({ key: "tickets.delete", size: "sm", payload: { ticketId } });
+const openTransferHistoryModal = () => openModal({ key: "equipment.transfer-history", size: "xl" });
+const openCreateEquipmentModal = () => openModal({ key: "equipment.create", size: "xl" });
+const openQrScannerModal = () => openModal({ key: "equipment.qr-scan", size: "md" });
+const openCreateTicketModal = () => openModal({ key: "tickets.create", size: "xl" });
 </script>
 
 <template>
-  <div class="p-6 space-y-6">
+  <div class="p-4 md:p-8">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Панель управления</h1>
-      <p class="text-gray-600 mt-1">Обзор состояния оборудования и активности системы</p>
+      <h1 class="text-xl font-bold text-gray-900 md:text-2xl">Панель управления</h1>
+      <p class="mt-1 text-sm text-gray-600 md:text-base">Обзор состояния оборудования и активности системы</p>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-      <div v-for="(stat, index) in stats" :key="index" :class="`bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow`">
-        <div class="p-6">
-          <div class="flex items-center">
-            <div :class="`w-12 h-12 rounded-lg flex items-center justify-center bg-${stat.color}-100`">
-              <i :class="`${stat.icon} text-xl text-${stat.color}-600`"></i>
-            </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600">{{ stat.title }}</p>
-              <p class="text-2xl font-bold text-gray-900">{{ stat.value }}</p>
-            </div>
+
+    <div class="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-6 xl:grid-cols-6">
+      <div v-for="stat in stats" :key="stat.title" class="rounded-xl bg-white p-4 shadow-sm">
+        <div class="flex items-center">
+          <div :class="`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-${stat.tone}-100 md:h-12 md:w-12`">
+            <i :class="`${stat.icon} text-lg md:text-xl text-${stat.tone}-600`"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-xs font-medium leading-tight text-gray-600">{{ stat.title }}</p>
+            <p class="text-xl font-bold text-gray-900 md:text-2xl">{{ stat.value }}</p>
           </div>
         </div>
       </div>
     </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div :class="`bg-white rounded-lg shadow-sm border border-gray-200`">
-        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <div>
-            <h3 class="text-lg font-medium text-gray-900">Последние заявки</h3>
-          </div>
-          <div class="flex items-center space-x-2">
-            <Button variant="outline" size="sm">
-              <i class="ri-eye-line mr-2"></i>
-              Все заявки
-            </Button>
-          </div>
+
+    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <section class="rounded-xl bg-white p-6 shadow-sm">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-bold text-gray-900">Последние заявки</h2>
+          <button class="rounded-lg border border-gray-300 px-3 py-2 text-sm" @click="noop"><i class="ri-eye-line mr-2"></i>Все заявки</button>
         </div>
-        <div class="p-6">
-          <div class="space-y-4">
-            <div v-for="ticket in recentTickets" :key="ticket.id" class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div class="flex-1">
-                <div class="flex items-center space-x-2">
-                  <span class="font-medium text-gray-900">{{ ticket.id }}</span>
-                  <span
-                    :class="`px-2 py-1 text-xs rounded-full ${
-                      ticket.priority === 'Высокий' ? 'bg-red-100 text-red-800' : ticket.priority === 'Средний' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
-                    }`"
-                  >
-                    {{ ticket.priority }}
-                  </span>
-                </div>
-                <p class="text-sm text-gray-600 mt-1">{{ `${ticket.equipment} - ${ticket.description}` }}</p>
+        <div class="space-y-3">
+          <div v-for="ticket in tickets" :key="ticket.id" class="flex items-start justify-between gap-2 rounded-lg bg-gray-50 p-3">
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-sm font-medium text-gray-900">#{{ ticket.id }}</span>
+                <span :class="`rounded-full px-2 py-0.5 text-xs ${ticket.priority === 'high' ? 'bg-red-100 text-red-800' : ticket.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`">{{ ticket.priorityText }}</span>
               </div>
-              <span :class="`px-3 py-1 text-xs font-medium rounded-full ${ticket.status === 'Новая' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}`">
-                {{ ticket.status }}
-              </span>
+              <p class="mt-1 truncate text-xs text-gray-600">{{ ticket.equipment }} - {{ ticket.description }}</p>
+            </div>
+            <div class="flex items-center gap-1">
+              <span :class="`rounded-full px-2 py-1 text-xs font-medium ${ticket.status === 'open' ? 'bg-teal-100 text-teal-800' : 'bg-orange-100 text-orange-800'}`">{{ ticket.statusText }}</span>
+              <button class="p-1.5 text-gray-400 hover:text-green-600" @click="openEditTicketModal(String(ticket.id))"><i class="ri-edit-line text-sm"></i></button>
+              <button class="p-1.5 text-gray-400 hover:text-red-600" @click="openDeleteTicketModal(String(ticket.id))"><i class="ri-delete-bin-line text-sm"></i></button>
             </div>
           </div>
         </div>
-      </div>
-      <div :class="`bg-white rounded-lg shadow-sm border border-gray-200`">
-        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <div>
-            <h3 class="text-lg font-medium text-gray-900">Последние передачи</h3>
-          </div>
-          <div class="flex items-center space-x-2">
-            <Button variant="outline" size="sm">
-              <i class="ri-history-line mr-2"></i>
-              История
-            </Button>
-          </div>
+      </section>
+
+      <section class="rounded-xl bg-white p-6 shadow-sm">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-bold text-gray-900">Последние передачи</h2>
+          <button class="rounded-lg border border-gray-300 px-3 py-2 text-sm" @click="openTransferHistoryModal"><i class="ri-history-line mr-2"></i>История</button>
         </div>
-        <div class="p-6">
-          <div class="space-y-4">
-            <div v-for="(transfer, index) in recentTransfers" :key="index" class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div class="flex-1">
-                <p class="font-medium text-gray-900">{{ transfer.equipment }}</p>
-                <div class="flex items-center text-sm text-gray-600 mt-1">
-                  <span>{{ transfer.from }}</span>
-                  <i class="ri-arrow-right-line mx-2"></i>
-                  <span>{{ transfer.to }}</span>
-                </div>
+        <div v-if="transfers.length" class="space-y-3">
+          <div v-for="transfer in transfers" :key="transfer.id" class="flex items-center justify-between gap-2 rounded-lg bg-gray-50 p-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-gray-900">{{ transfer.equipment }}</p>
+              <div class="mt-1 flex flex-wrap items-center gap-1 text-xs text-gray-600">
+                <span class="truncate">{{ transfer.from }}</span>
+                <i class="ri-arrow-right-line"></i>
+                <span class="truncate">{{ transfer.to }}</span>
               </div>
-              <span class="text-sm text-gray-500">{{ transfer.date }}</span>
             </div>
+            <span class="flex-shrink-0 text-xs text-gray-500">{{ transfer.date }}</span>
           </div>
         </div>
-      </div>
+        <div v-else class="rounded-lg bg-gray-50 p-4 text-sm text-gray-500">История передач пока пуста.</div>
+      </section>
     </div>
-    <div :class="`bg-white rounded-lg shadow-sm border border-gray-200`">
-      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-        <div>
-          <h3 class="text-lg font-medium text-gray-900">Быстрые действия</h3>
-        </div>
+
+    <section class="mt-6 rounded-xl bg-white p-6 shadow-sm">
+      <div class="mb-4">
+        <h2 class="text-base font-bold text-gray-900 md:text-lg">Быстрые действия</h2>
+        <p class="mt-1 text-xs text-gray-600 md:text-sm">Часто используемые функции</p>
       </div>
-      <div class="p-6">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Button :class="'h-20 flex-col'">
-            <i class="ri-add-line text-xl mb-2"></i>
-            Добавить оборудование
-          </Button>
-          <Button :variant="'secondary'" :class="'h-20 flex-col'">
-            <i class="ri-qr-scan-line text-xl mb-2"></i>
-            Сканировать QR
-          </Button>
-          <Button :variant="'success'" :class="'h-20 flex-col'">
-            <i class="ri-customer-service-line text-xl mb-2"></i>
-            Создать заявку
-          </Button>
-          <Button :variant="'outline'" :class="'h-20 flex-col'">
-            <i class="ri-file-download-line text-xl mb-2"></i>
-            Экспорт данных
-          </Button>
-        </div>
+      <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <button class="flex h-16 flex-col items-center justify-center rounded-lg bg-teal-600 text-xs text-white md:h-20 md:text-sm" @click="openCreateEquipmentModal"><i class="ri-add-line mb-1 text-lg md:text-xl"></i>Добавить оборудование</button>
+        <button class="flex h-16 flex-col items-center justify-center rounded-lg bg-gray-900 text-xs text-white md:h-20 md:text-sm" @click="openQrScannerModal"><i class="ri-qr-scan-line mb-1 text-lg md:text-xl"></i>Сканировать QR</button>
+        <button class="flex h-16 flex-col items-center justify-center rounded-lg bg-green-600 text-xs text-white md:h-20 md:text-sm" @click="openCreateTicketModal"><i class="ri-customer-service-line mb-1 text-lg md:text-xl"></i>Создать заявку</button>
+        <button class="flex h-16 flex-col items-center justify-center rounded-lg border border-gray-300 bg-white text-xs text-gray-700 md:h-20 md:text-sm" @click="openExportModal"><i class="ri-file-download-line mb-1 text-lg md:text-xl"></i>Экспорт данных</button>
       </div>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div :class="`bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-red-500`">
-        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <div>
-            <h3 class="text-lg font-medium text-gray-900">Требуют внимания</h3>
-          </div>
-        </div>
-        <div class="p-6">
-          <div class="space-y-3">
-            <div class="flex items-center text-red-600">
-              <i class="ri-error-warning-line mr-2"></i>
-              <span class="text-sm">8 единиц с просроченным ТО</span>
-            </div>
-            <div class="flex items-center text-orange-600">
-              <i class="ri-user-unfollow-line mr-2"></i>
-              <span class="text-sm">12 единиц без ответственного</span>
-            </div>
-            <div class="flex items-center text-red-600">
-              <i class="ri-tools-line mr-2"></i>
-              <span class="text-sm">23 неисправных единицы</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div :class="`bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 border-l-green-500`">
-        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <div>
-            <h3 class="text-lg font-medium text-gray-900">Статистика за месяц</h3>
-          </div>
-        </div>
-        <div class="p-6">
-          <div class="space-y-3">
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-600">Выполнено ТО:</span>
-              <span class="font-medium">156</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-600">Закрыто заявок:</span>
-              <span class="font-medium">89</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-sm text-gray-600">Передач оборудования:</span>
-              <span class="font-medium">34</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </section>
   </div>
 </template>
