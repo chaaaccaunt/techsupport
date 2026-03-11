@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useModal } from "@/share/components/shared/useModal";
-import { getEquipmentViewItems } from "@/share/mocks/schemaMocks";
+import { useAppData } from "@/share/libs/useAppData";
+import { downloadCsv } from "@/share/libs/downloadCsv";
 
 const selectedCategory = ref("all");
 const selectedStatus = ref("all");
 const viewMode = ref("list");
-const noop = () => {};
 const { openModal } = useModal();
 const openCreateEquipmentModal = () => openModal({ key: "equipment.create", size: "xl" });
 const openViewEquipmentModal = (equipmentId: string) => openModal({ key: "equipment.view", size: "xl", payload: { equipmentId } });
@@ -29,7 +29,25 @@ const statuses = [
   { value: "disposed", label: "Списанное" },
 ];
 
-const equipment = computed(() => getEquipmentViewItems());
+const { routeData } = useAppData();
+const equipment = computed(() => routeData.value.equipment?.items ?? []);
+
+function exportEquipment() {
+  downloadCsv(
+    `equipment_${new Date().toISOString().split("T")[0]}.csv`,
+    ["Название", "Код", "Серийный номер", "Категория", "Статус", "Локация", "Ответственный", "Следующее ТО"],
+    equipment.value.map((item) => [
+      item.name,
+      item.code,
+      item.serial,
+      item.category,
+      item.statusText,
+      item.location,
+      item.responsible,
+      item.nextMaintenance,
+    ]),
+  );
+}
 </script>
 
 <template>
@@ -40,7 +58,7 @@ const equipment = computed(() => getEquipmentViewItems());
         <p class="mt-1 text-sm text-gray-600">Управление парком оборудования</p>
       </div>
       <div class="flex items-center gap-2">
-        <button class="rounded-lg border border-gray-300 px-4 py-2 text-sm" @click="noop"><i class="ri-download-line mr-2"></i>Экспорт</button>
+        <button class="rounded-lg border border-gray-300 px-4 py-2 text-sm" @click="exportEquipment"><i class="ri-download-line mr-2"></i>Экспорт</button>
         <button class="rounded-lg bg-teal-600 px-4 py-2 text-sm text-white" @click="openCreateEquipmentModal"><i class="ri-add-line mr-2"></i>Добавить оборудование</button>
       </div>
     </div>
@@ -51,8 +69,8 @@ const equipment = computed(() => getEquipmentViewItems());
         <div class="flex items-center gap-2"><span class="text-sm text-gray-600">Категория:</span><select v-model="selectedCategory" class="rounded-lg border border-gray-300 px-3 py-2 text-sm"><option v-for="category in categories" :key="category.value" :value="category.value">{{ category.label }}</option></select></div>
         <div class="flex items-center gap-2"><span class="text-sm text-gray-600">Статус:</span><select v-model="selectedStatus" class="rounded-lg border border-gray-300 px-3 py-2 text-sm"><option v-for="status in statuses" :key="status.value" :value="status.value">{{ status.label }}</option></select></div>
         <div class="flex items-center rounded-lg border border-gray-300">
-          <button :class="`p-2 ${viewMode === 'list' ? 'bg-teal-100 text-teal-600' : 'text-gray-500'}`" @click="noop"><i class="ri-list-unordered text-sm"></i></button>
-          <button :class="`p-2 ${viewMode === 'grid' ? 'bg-teal-100 text-teal-600' : 'text-gray-500'}`" @click="noop"><i class="ri-grid-line text-sm"></i></button>
+          <button :class="`p-2 ${viewMode === 'list' ? 'bg-teal-100 text-teal-600' : 'text-gray-500'}`" @click="viewMode = 'list'"><i class="ri-list-unordered text-sm"></i></button>
+          <button :class="`p-2 ${viewMode === 'grid' ? 'bg-teal-100 text-teal-600' : 'text-gray-500'}`" @click="viewMode = 'grid'"><i class="ri-grid-line text-sm"></i></button>
         </div>
       </div>
     </section>

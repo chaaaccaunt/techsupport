@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 import Main from "./layouts/Main.vue";
 import Auth from "./layouts/Auth.vue";
+import FeedbackHost from "./share/components/features/FeedbackHost.vue";
 
 const route = useRoute();
 
@@ -16,6 +17,7 @@ const layouts = computed(() => components[route.meta.layout]);
 
 <template>
   <component :is="layouts"></component>
+  <FeedbackHost />
 </template>
 
 <style lang="scss">

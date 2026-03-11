@@ -2,16 +2,19 @@
 import { computed, reactive } from "vue";
 import AppModal from "./AppModal.vue";
 import { useModal } from "./useModal";
-import { modalDepartments, modalPositions } from "./modalMocks";
 import { iModalDescriptor } from "@/entities/store/modules/modal";
+import { useAppData } from "@/share/libs/useAppData";
 
 const props = defineProps<{ modal: iModalDescriptor }>();
 const { closeModal } = useModal();
+const { routeData } = useAppData();
 
 const departmentPayload = computed(() => (props.modal.payload as { departmentId?: string } | undefined) ?? {});
 const positionPayload = computed(() => (props.modal.payload as { positionId?: string } | undefined) ?? {});
-const department = computed(() => modalDepartments.find((item) => item.id === departmentPayload.value.departmentId) ?? { id: "", shortName: "", name: "", employeeCount: 0 });
-const position = computed(() => modalPositions.find((item) => item.id === positionPayload.value.positionId) ?? { id: "", shortName: "", name: "", employeeCount: 0 });
+const departments = computed(() => routeData.value.departments?.departments ?? []);
+const positions = computed(() => routeData.value.departments?.positions ?? []);
+const department = computed(() => departments.value.find((item) => item.id === Number(departmentPayload.value.departmentId)) ?? { id: 0, shortName: "", name: "", employeeCount: 0 });
+const position = computed(() => positions.value.find((item) => item.id === Number(positionPayload.value.positionId)) ?? { id: 0, shortName: "", name: "", employeeCount: 0 });
 
 const departmentForm = reactive({ shortName: department.value.shortName, name: department.value.name });
 const positionForm = reactive({ shortName: position.value.shortName, name: position.value.name });

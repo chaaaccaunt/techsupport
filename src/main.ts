@@ -20,7 +20,7 @@ app.use(store, key)
 app.use(router)
 app.mount('#app')
 
-export const socket = io("http://localhost", {
+export const socket = io(process.env.VUE_APP_BASE_URL, {
   withCredentials: true,
   reconnectionAttempts: 10,
   reconnectionDelay: 1000,

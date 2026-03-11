@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useModal } from "@/share/components/shared/useModal";
-import { getUserViewItems } from "@/share/mocks/schemaMocks";
+import { useAppData } from "@/share/libs/useAppData";
 
 const selectedRole = ref("all");
 const noop = () => {};
@@ -19,7 +19,8 @@ const roles = [
   { value: "user", label: "Пользователь" },
 ];
 
-const users = computed(() => getUserViewItems());
+const { routeData } = useAppData();
+const users = computed(() => routeData.value.users?.items ?? []);
 </script>
 
 <template>

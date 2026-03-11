@@ -2,11 +2,13 @@
 import { computed, ref } from "vue";
 import AppModal from "./AppModal.vue";
 import { useModal } from "./useModal";
-import { maintenanceCalendarItems } from "./modalMocks";
 import { iModalDescriptor } from "@/entities/store/modules/modal";
+import { useAppData } from "@/share/libs/useAppData";
 
 const props = defineProps<{ modal: iModalDescriptor }>();
 const { closeModal } = useModal();
+const { routeData } = useAppData();
+const maintenanceCalendarItems = computed(() => routeData.value.maintenance?.items ?? []);
 
 const weekDays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 const monthNames = ["Января", "Февраля", "Марта", "Апреля", "Мая", "Июня", "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"];
@@ -14,9 +16,9 @@ const currentMonth = ref(new Date(2024, 11, 1));
 const selectedDate = ref<Date | null>(null);
 
 const stats = computed(() => ({
-  scheduled: maintenanceCalendarItems.filter((item) => item.status === "scheduled").length,
-  overdue: maintenanceCalendarItems.filter((item) => item.status === "overdue").length,
-  completed: maintenanceCalendarItems.filter((item) => item.status === "completed").length,
+  scheduled: maintenanceCalendarItems.value.filter((item) => item.status === "scheduled").length,
+  overdue: maintenanceCalendarItems.value.filter((item) => item.status === "overdue").length,
+  completed: maintenanceCalendarItems.value.filter((item) => item.status === "completed").length,
 }));
 
 function closeCurrent() {
@@ -25,7 +27,7 @@ function closeCurrent() {
 
 function getMaintenanceForDate(date: Date) {
   const isoDate = `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, "0")}-${`${date.getDate()}`.padStart(2, "0")}`;
-  return maintenanceCalendarItems.filter((item) => item.date === isoDate);
+  return maintenanceCalendarItems.value.filter((item) => item.date === isoDate);
 }
 
 const calendarDays = computed(() => {
@@ -34,7 +36,7 @@ const calendarDays = computed(() => {
   const firstDay = new Date(year, month, 1);
   const firstWeekDay = (firstDay.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const cells: Array<{ date: Date | null; items: typeof maintenanceCalendarItems }> = [];
+  const cells: Array<{ date: Date | null; items: typeof maintenanceCalendarItems.value }> = [];
 
   for (let i = 0; i < firstWeekDay; i += 1) {
     cells.push({ date: null, items: [] });

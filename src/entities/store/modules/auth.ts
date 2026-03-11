@@ -1,58 +1,37 @@
 import { Module } from "vuex";
 import { RootState } from "..";
+import { AuthCookieUser, emptyAuthCookieUser, parseUserCookie } from "@/share/libs/authCookie";
 
-interface iRoles {
-  id: number,
-  name: string,
-  description: string
+export interface AuthState {
+  currentUser: AuthCookieUser;
+  passwordChanged: boolean;
 }
 
-export interface iUserInfo {
-  id: number,
-  fullName: string
-  firstName: string
-  lastName: string
-  surname: string | null,
-  email: string
-  phone: string
-  staff: iStaff
-}
-
-interface iStaff {
-  organization: iOrganization,
-  position: {
-    id: number,
-    fullName: string
-  }
-  department: {
-    id: number,
-    fullName: string
-  }
-  roles: iRoles[]
-}
-interface iOrganization {
-  id: number,
-  shortName: string
-  fullName: string
-}
-
-interface iRoles {
-  name: string
-  description: string
-}
-
-export interface iUserState {
-  user: iUserInfo
-}
-
-export const auth: Module<iUserState, RootState> = {
+export const auth: Module<AuthState, RootState> = {
   namespaced: true,
-  mutations: {
-    SET_USER(state, payload: iUserInfo) {
-      state.user = payload
-    }
-  },
+  state: () => ({
+    currentUser: emptyAuthCookieUser,
+    passwordChanged: false,
+  }),
   getters: {
-    GET_USER: (store) => store.user
-  }
-}
+    currentUser: (state) => state.currentUser,
+  },
+  mutations: {
+    SET_CURRENT_USER(state, user: AuthCookieUser) {
+      state.currentUser = user;
+    },
+    SET_PASSWORD_CHANGED(state, value: boolean) {
+      state.passwordChanged = value;
+    },
+  },
+  actions: {
+    initFromCookie({ commit }) {
+      const user = parseUserCookie();
+      commit("SET_CURRENT_USER", user);
+      return user;
+    },
+    setCurrentUser({ commit }, user: AuthCookieUser) {
+      commit("SET_CURRENT_USER", user);
+    },
+  },
+};

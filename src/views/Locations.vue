@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useModal } from "@/share/components/shared/useModal";
-import { getLocationViewItems } from "@/share/mocks/schemaMocks";
+import { useAppData } from "@/share/libs/useAppData";
 
 const selectedBuilding = ref("all");
 const searchQuery = ref("");
@@ -13,7 +13,8 @@ const openDeleteLocationModal = (locationId: number) => openModal({ key: "locati
 const openLocationEquipmentModal = (locationId: number) => openModal({ key: "locations.equipment", size: "xl", payload: { locationId } });
 
 const buildings = [{ value: "all", label: "Все локации" }];
-const locations = computed(() => getLocationViewItems());
+const { routeData } = useAppData();
+const locations = computed(() => routeData.value.locations?.items ?? []);
 </script>
 
 <template>

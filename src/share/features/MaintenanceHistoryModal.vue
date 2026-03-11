@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useModal } from "@/share/components/modals/useModal";
-import { getMaintenanceViewItems } from "@/share/mocks/schemaMocks";
+import { useAppData } from "@/share/libs/useAppData";
 
 const filter = ref<"all" | "completed" | "scheduled" | "overdue">("all");
-const records = computed(() => getMaintenanceViewItems());
+const { routeData } = useAppData();
+const records = computed(() => routeData.value.maintenance?.items ?? []);
 const filteredRecords = computed(() => filter.value === "all" ? records.value : records.value.filter((item) => item.status === filter.value));
 const noop = () => {};
 const { closeModal } = useModal();

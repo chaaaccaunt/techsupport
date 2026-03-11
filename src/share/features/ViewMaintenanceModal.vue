@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useModal } from "@/share/components/modals/useModal";
-import { getMaintenanceViewItems, getTicketViewItems } from "@/share/mocks/schemaMocks";
+import { useAppData } from "@/share/libs/useAppData";
 
 const { closeModal } = useModal();
-const maintenance = computed(() => getMaintenanceViewItems()[0]);
-const relatedTicket = computed(() => getTicketViewItems().find((item) => item.equipment === maintenance.value?.equipmentId?.toString()) ?? getTicketViewItems()[0]);
+const { routeData } = useAppData();
+const maintenance = computed(() => routeData.value.maintenance?.items?.[0]);
+const relatedTickets = computed(() => routeData.value.maintenance?.tickets ?? []);
+const relatedTicket = computed(() => relatedTickets.value.find((item) => item.equipment === maintenance.value?.equipmentId?.toString()) ?? relatedTickets.value[0]);
 
 function closeCurrent() {
   closeModal();

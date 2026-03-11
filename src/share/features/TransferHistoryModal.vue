@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useModal } from "@/share/components/modals/useModal";
-import { getTransferViewItems } from "@/share/mocks/schemaMocks";
+import { useAppData } from "@/share/libs/useAppData";
 
 const { closeModal } = useModal();
 const filter = ref<"all" | "internal" | "crossDepartment">("all");
-const records = computed(() => getTransferViewItems());
+const { routeData } = useAppData();
+const records = computed(() => routeData.value.dashboard?.transfers ?? []);
 const internalCount = computed(() => records.value.filter((item) => item.from.split(" / ")[0] === item.to.split(" / ")[0]).length);
 const crossDepartmentCount = computed(() => records.value.length - internalCount.value);
 const filteredRecords = computed(() => {

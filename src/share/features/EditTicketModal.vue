@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useModal } from "@/share/components/modals/useModal";
-import { ticketPriorities, ticketStatuses } from "@/share/mocks/schemaMocks";
+import { useAppData } from "@/share/libs/useAppData";
 
-const statuses = computed(() => ticketStatuses);
-const priorities = computed(() => ticketPriorities);
+const { staticCatalogs } = useAppData();
+const statuses = computed(() => staticCatalogs.value?.ticketStatuses ?? []);
+const priorities = computed(() => staticCatalogs.value?.ticketPriorities ?? []);
 const noop = () => {};
 const { closeModal } = useModal();
 

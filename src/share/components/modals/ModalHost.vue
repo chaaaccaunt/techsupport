@@ -2,25 +2,38 @@
 import { computed } from "vue";
 import { useStore } from "@/entities";
 import AppModal from "./AppModal.vue";
-import { iModalDescriptor } from "@/entities/store/modules/modal";
 import { modalTitleMap } from "./modalRegistry";
 import { modalComponentRegistry } from "./modalComponents";
 
+type ModalSize = "sm" | "md" | "lg" | "xl" | "full";
+
+interface ModalDescriptor {
+  id: string;
+  key: string;
+  title?: string;
+  description?: string;
+  size?: ModalSize;
+  dismissible?: boolean;
+  confirmText?: string;
+  cancelText?: string;
+  payload?: unknown;
+}
+
 const store = useStore();
 
-const stack = computed(() => store.getters["modal/GET_STACK"] as iModalDescriptor[]);
-const activeModal = computed(() => store.getters["modal/GET_ACTIVE_MODAL"] as iModalDescriptor | null);
+const stack = computed(() => store.getters["modal/GET_STACK"] as ModalDescriptor[]);
+const activeModal = computed(() => store.getters["modal/GET_ACTIVE_MODAL"] as ModalDescriptor | null);
 const hasOpenModal = computed(() => store.getters["modal/HAS_OPEN_MODAL"] as boolean);
 
 function closeById(modalId: string) {
   store.dispatch("modal/close", modalId);
 }
 
-function resolveTitle(modal: iModalDescriptor) {
+function resolveTitle(modal: ModalDescriptor) {
   return modal.title || modalTitleMap[modal.key as keyof typeof modalTitleMap] || "Модальное окно";
 }
 
-function resolveComponent(modal: iModalDescriptor) {
+function resolveComponent(modal: ModalDescriptor) {
   return modalComponentRegistry[modal.key as keyof typeof modalComponentRegistry] ?? null;
 }
 </script>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../base/Button';
 
 interface HeaderProps {
@@ -9,6 +9,7 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const notifications = [
     { id: 1, text: 'Просрочено ТО для оборудования ПК-001', type: 'warning', time: '5 мин назад' },
@@ -84,7 +85,15 @@ export function Header({ onMenuClick }: HeaderProps) {
                   ))}
                 </div>
                 <div className="p-4">
-                  <Button variant="outline" size="sm" className="w-full">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      setIsNotificationsOpen(false);
+                      navigate('/notifications');
+                    }}
+                  >
                     Показать все уведомления
                   </Button>
                 </div>

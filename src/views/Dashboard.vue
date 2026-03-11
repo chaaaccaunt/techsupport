@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useRouter } from "vue-router";
 import { useModal } from "@/share/components/shared/useModal";
-import { getDashboardStats, getTicketViewItems, getTransferViewItems } from "@/share/mocks/schemaMocks";
+import { useAppData } from "@/share/libs/useAppData";
 
+const router = useRouter();
 const { openModal } = useModal();
-const stats = computed(() => getDashboardStats());
-const tickets = computed(() => getTicketViewItems());
-const transfers = computed(() => getTransferViewItems().slice(0, 4));
+const { routeData } = useAppData();
+const dashboardData = computed(() => routeData.value.dashboard);
+const stats = computed(() => dashboardData.value?.stats ?? []);
+const tickets = computed(() => dashboardData.value?.tickets ?? []);
+const transfers = computed(() => (dashboardData.value?.transfers ?? []).slice(0, 4));
 
-const noop = () => {};
+const openTicketsHistory = () => router.push({ name: "Tickets" });
 const openExportModal = () => openModal({ key: "dashboard.export", size: "md" });
 const openEditTicketModal = (ticketId: string) => openModal({ key: "dashboard.edit-ticket", size: "lg", payload: { ticketId } });
 const openDeleteTicketModal = (ticketId: string) => openModal({ key: "tickets.delete", size: "sm", payload: { ticketId } });
@@ -43,7 +47,7 @@ const openCreateTicketModal = () => openModal({ key: "tickets.create", size: "xl
       <section class="rounded-xl bg-white p-6 shadow-sm">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-lg font-bold text-gray-900">Последние заявки</h2>
-          <button class="rounded-lg border border-gray-300 px-3 py-2 text-sm" @click="noop"><i class="ri-eye-line mr-2"></i>Все заявки</button>
+          <button class="rounded-lg border border-gray-300 px-3 py-2 text-sm" @click="openTicketsHistory"><i class="ri-history-line mr-2"></i>История</button>
         </div>
         <div class="space-y-3">
           <div v-for="ticket in tickets" :key="ticket.id" class="flex items-start justify-between gap-2 rounded-lg bg-gray-50 p-3">

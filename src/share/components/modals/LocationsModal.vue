@@ -2,17 +2,19 @@
 import { computed, reactive } from "vue";
 import AppModal from "./AppModal.vue";
 import { useModal } from "./useModal";
-import { equipments, getLocationViewItems } from "@/share/mocks/schemaMocks";
 import { iModalDescriptor } from "@/entities/store/modules/modal";
+import { useAppData } from "@/share/libs/useAppData";
 
 const props = defineProps<{ modal: iModalDescriptor }>();
 const { closeModal } = useModal();
+const { routeData } = useAppData();
 
 const payload = computed(() => (props.modal.payload as { locationId?: number } | undefined) ?? {});
-const locations = getLocationViewItems();
-const location = computed(() => locations.find((item) => item.id === payload.value.locationId) ?? locations[0]);
-const locationEquipment = computed(() => equipments.filter((item) => item.locationId === location.value.id));
-const editForm = reactive({ name: location.value.name });
+const locations = computed(() => routeData.value.locations?.items ?? []);
+const equipmentOptions = computed(() => routeData.value.locations?.equipmentOptions ?? []);
+const location = computed(() => locations.value.find((item) => item.id === payload.value.locationId) ?? locations.value[0]);
+const locationEquipment = computed(() => equipmentOptions.value.filter((item) => item.locationId === location.value?.id));
+const editForm = reactive({ name: location.value?.name ?? "" });
 
 function closeCurrent() {
   closeModal(props.modal.id);
@@ -35,7 +37,7 @@ function closeCurrent() {
           <div class="rounded-lg bg-gray-50 p-3"><p class="mb-1 text-xs text-gray-500">ID</p><p class="text-sm font-medium text-gray-900">{{ location.id }}</p></div>
           <div class="rounded-lg bg-gray-50 p-3"><p class="mb-1 text-xs text-gray-500">Оборудование</p><p class="text-sm font-medium text-gray-900">{{ location.equipmentCount }} ед.</p></div>
         </div>
-        <div class="rounded-lg bg-gray-50 p-3 text-sm text-gray-700">По `DB_SCHEMA.md` у сущности `locations` нет полей здания, этажа, площади или ответственного. Старые mock-поля удалены.</div>
+        <div class="rounded-lg bg-gray-50 p-3 text-sm text-gray-700">По `DB_SCHEMA.md` у сущности `locations` нет полей здания, площади или ответственного. Старые mock-поля удалены.</div>
       </div>
       <div class="mt-6 flex justify-end"><button class="whitespace-nowrap rounded-lg bg-teal-600 px-4 py-2 text-sm text-white hover:bg-teal-700" @click="closeCurrent">Закрыть</button></div>
     </div>
@@ -48,7 +50,7 @@ function closeCurrent() {
         <button class="cursor-pointer text-gray-400 hover:text-gray-600" @click="closeCurrent"><i class="ri-close-line text-xl"></i></button>
       </div>
       <div><label class="mb-1 block text-sm font-medium text-gray-700">Название локации</label><input v-model="editForm.name" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" /></div>
-      <div class="flex justify-end space-x-3 pt-4 mt-6"><button class="whitespace-nowrap rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" @click="closeCurrent">Отмена</button><button class="whitespace-nowrap rounded-lg bg-teal-600 px-4 py-2 text-sm text-white hover:bg-teal-700">Сохранить изменения</button></div>
+      <div class="mt-6 flex justify-end space-x-3 pt-4"><button class="whitespace-nowrap rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" @click="closeCurrent">Отмена</button><button class="whitespace-nowrap rounded-lg bg-teal-600 px-4 py-2 text-sm text-white hover:bg-teal-700">Сохранить изменения</button></div>
     </div>
   </AppModal>
 

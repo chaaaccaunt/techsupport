@@ -2,21 +2,22 @@
 import { computed, reactive } from "vue";
 import AppModal from "./AppModal.vue";
 import { useModal } from "./useModal";
-import { getEquipmentViewItems } from "@/share/mocks/schemaMocks";
 import { iModalDescriptor } from "@/entities/store/modules/modal";
+import { useAppData } from "@/share/libs/useAppData";
 
 const props = defineProps<{ modal: iModalDescriptor }>();
 const { closeModal } = useModal();
+const { routeData } = useAppData();
 
 const payload = computed(() => (props.modal.payload as { equipmentId?: string } | undefined) ?? {});
-const equipmentList = getEquipmentViewItems();
-const item = computed(() => equipmentList.find((entry) => String(entry.id) === payload.value.equipmentId) ?? equipmentList[0]);
+const equipmentList = computed(() => routeData.value.equipment?.items ?? []);
+const item = computed(() => equipmentList.value.find((entry) => String(entry.id) === payload.value.equipmentId) ?? equipmentList.value[0]);
 const form = reactive({
-  name: item.value.name,
-  category: item.value.category,
-  serial: item.value.serial,
-  status: item.value.status,
-  location: item.value.location,
+  name: item.value?.name ?? "",
+  category: item.value?.category ?? "",
+  serial: item.value?.serial ?? "",
+  status: item.value?.status ?? "",
+  location: item.value?.location ?? "",
 });
 
 function closeCurrent() {

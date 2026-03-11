@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import { downloadCsv } from "@/share/libs/downloadCsv";
 
 const selectedPeriod = ref("month");
 const selectedReport = ref("equipment");
-const noop = () => {};
 
 const periods = [
   { value: "week", label: "Неделя" },
@@ -25,6 +25,29 @@ const quickReports = [
   { title: "Активные заявки", description: "Заявки в статусе «Новая» и «В работе»", count: 68, icon: "ri-customer-service-line", tone: "blue" },
   { title: "Оборудование на складе", description: "Неиспользуемое оборудование на складе", count: 156, icon: "ri-archive-line", tone: "purple" },
 ];
+
+const selectedReportLabel = computed(() => reportTypes.find((item) => item.value === selectedReport.value)?.label ?? "Отчет");
+
+function exportReport() {
+  const filename = `report_${selectedReport.value}_${selectedPeriod.value}_${new Date().toISOString().split("T")[0]}.csv`;
+
+  if (selectedReport.value === "equipment") {
+    downloadCsv(
+      filename,
+      ["Показатель", "Значение"],
+      [
+        ["Всего", 1247],
+        ["Исправное", 1156],
+        ["Неисправное", 23],
+        ["На ТО", 45],
+        ["Списанное", 23],
+      ],
+    );
+    return;
+  }
+
+  downloadCsv(filename, ["Отчет", "Период", "Статус"], [[selectedReportLabel.value, selectedPeriod.value, "В разработке"]]);
+}
 </script>
 
 <template>
@@ -36,7 +59,7 @@ const quickReports = [
       </div>
       <div class="flex items-center gap-2">
         <select v-model="selectedPeriod" class="rounded-lg border border-gray-300 px-3 py-2 text-sm"><option v-for="period in periods" :key="period.value" :value="period.value">{{ period.label }}</option></select>
-        <button class="rounded-lg border border-gray-300 px-4 py-2 text-sm"><i class="ri-download-line mr-2"></i>Экспорт отчета</button>
+        <button class="rounded-lg border border-gray-300 px-4 py-2 text-sm" @click="exportReport"><i class="ri-download-line mr-2"></i>Экспорт отчета</button>
       </div>
     </div>
 
@@ -58,7 +81,7 @@ const quickReports = [
     <section class="rounded-xl bg-white shadow-sm">
       <div class="overflow-x-auto border-b border-gray-200 px-4">
         <nav class="flex min-w-max space-x-4 md:space-x-8">
-          <button v-for="type in reportTypes" :key="type.value" :class="`border-b-2 px-1 py-4 text-sm font-medium ${selectedReport === type.value ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500'}`" @click="noop">{{ type.label }}</button>
+          <button v-for="type in reportTypes" :key="type.value" :class="`border-b-2 px-1 py-4 text-sm font-medium ${selectedReport === type.value ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500'}`" @click="selectedReport = type.value">{{ type.label }}</button>
         </nav>
       </div>
       <div class="p-4 md:p-6">
@@ -76,7 +99,9 @@ const quickReports = [
             <div class="flex items-center justify-between gap-3"><span class="w-32 flex-shrink-0 text-sm text-gray-700">Мониторы</span><div class="flex flex-1 items-center gap-2"><div class="h-2 flex-1 rounded-full bg-gray-200"><div class="h-2 rounded-full bg-teal-600" style="width: 27.7%"></div></div><span class="w-10 text-right text-sm font-medium text-gray-900">345</span><span class="w-12 text-right text-sm text-gray-500">27.7%</span></div></div>
           </div>
         </div>
-        <div v-else class="rounded-lg bg-gray-50 p-6 text-sm text-gray-600">Экран отчета оставлен в статическом виде без обработчиков. Активна вкладка: {{ reportTypes.find((item) => item.value === selectedReport)?.label }}</div>
+        <div v-else class="rounded-lg bg-gray-50 p-6 text-sm text-gray-600">
+          {{ selectedReportLabel }} переключается корректно. Детальная аналитика для этого блока пока остается статической, но экспорт уже работает и отдает выбранный тип отчета и период.
+        </div>
       </div>
     </section>
   </div>

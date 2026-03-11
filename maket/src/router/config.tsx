@@ -1,4 +1,3 @@
-
 import { RouteObject } from 'react-router-dom';
 import HomePage from '../pages/home/page';
 import DashboardPage from '../pages/dashboard/page';
@@ -14,6 +13,7 @@ import SettingsPage from '../pages/settings/page';
 import DepartmentsPage from '../pages/departments/page';
 import ChatPage from '../pages/chat/page';
 import NotFound from '../pages/NotFound';
+import NotificationsPage from '../pages/notifications/page';
 
 const routes: RouteObject[] = [
   {
@@ -67,6 +67,10 @@ const routes: RouteObject[] = [
   {
     path: '/departments',
     element: <DepartmentsPage />,
+  },
+  {
+    path: '/notifications',
+    element: <NotificationsPage />
   },
   {
     path: '*',

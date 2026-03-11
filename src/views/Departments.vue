@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useModal } from "@/share/components/shared/useModal";
-import { getDepartmentViewItems, getPositionViewItems } from "@/share/mocks/schemaMocks";
+import { useAppData } from "@/share/libs/useAppData";
 
 const activeTab = ref<"departments" | "positions">("departments");
-const noop = () => {};
 const { openModal } = useModal();
 const openCreateDepartmentModal = () => openModal({ key: "departments.create", size: "lg" });
 const openCreatePositionModal = () => openModal({ key: "positions.create", size: "lg" });
@@ -13,8 +12,9 @@ const openDeleteDepartmentModal = (departmentId: number) => openModal({ key: "de
 const openEditPositionModal = (positionId: number) => openModal({ key: "positions.edit", size: "lg", payload: { positionId: String(positionId) } });
 const openDeletePositionModal = (positionId: number) => openModal({ key: "positions.delete", size: "sm", payload: { positionId: String(positionId) } });
 
-const departments = computed(() => getDepartmentViewItems());
-const positions = computed(() => getPositionViewItems());
+const { routeData } = useAppData();
+const departments = computed(() => routeData.value.departments?.departments ?? []);
+const positions = computed(() => routeData.value.departments?.positions ?? []);
 </script>
 
 <template>
@@ -26,8 +26,8 @@ const positions = computed(() => getPositionViewItems());
 
     <div class="mb-6 flex items-center justify-between">
       <div class="flex items-center gap-2 rounded-lg bg-gray-100 p-1">
-        <button :class="`rounded-md px-4 py-2 text-sm font-medium ${activeTab === 'departments' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`" @click="noop"><i class="ri-building-line mr-2"></i>Отделы ({{ departments.length }})</button>
-        <button :class="`rounded-md px-4 py-2 text-sm font-medium ${activeTab === 'positions' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`" @click="noop"><i class="ri-user-star-line mr-2"></i>Должности ({{ positions.length }})</button>
+        <button :class="`rounded-md px-4 py-2 text-sm font-medium ${activeTab === 'departments' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`" @click="activeTab = 'departments'"><i class="ri-building-line mr-2"></i>Отделы ({{ departments.length }})</button>
+        <button :class="`rounded-md px-4 py-2 text-sm font-medium ${activeTab === 'positions' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'}`" @click="activeTab = 'positions'"><i class="ri-user-star-line mr-2"></i>Должности ({{ positions.length }})</button>
       </div>
       <button class="rounded-lg bg-teal-600 px-4 py-2 text-sm text-white" @click="activeTab === 'departments' ? openCreateDepartmentModal() : openCreatePositionModal()"><i class="ri-add-line mr-2"></i>{{ activeTab === 'departments' ? 'Добавить отдел' : 'Добавить должность' }}</button>
     </div>

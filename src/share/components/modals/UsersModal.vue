@@ -2,14 +2,16 @@
 import { computed, reactive } from "vue";
 import AppModal from "./AppModal.vue";
 import { useModal } from "./useModal";
-import { modalUsers } from "./modalMocks";
 import { iModalDescriptor } from "@/entities/store/modules/modal";
+import { useAppData } from "@/share/libs/useAppData";
 
 const props = defineProps<{ modal: iModalDescriptor }>();
 const { closeModal, openModal } = useModal();
+const { routeData } = useAppData();
 
 const payload = computed(() => (props.modal.payload as { userId?: number } | undefined) ?? {});
-const user = computed(() => modalUsers.find((item) => item.id === payload.value.userId) ?? modalUsers[0]);
+const users = computed(() => routeData.value.users?.items ?? []);
+const user = computed(() => users.value.find((item) => item.id === payload.value.userId) ?? users.value[0]);
 
 const editForm = reactive({
   lastName: user.value.name.split(" ")[0] ?? "",
